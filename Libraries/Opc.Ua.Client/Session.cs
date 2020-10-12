@@ -37,6 +37,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using static Opc.Ua.Utils;
 
 namespace Opc.Ua.Client
 {
@@ -321,7 +322,14 @@ namespace Opc.Ua.Client
                 // the server nonce should be validated if the token includes a secret.
                 if (!Utils.Nonce.ValidateNonce(serverNonce, MessageSecurityMode.SignAndEncrypt, (uint)m_configuration.SecurityConfiguration.NonceLength))
                 {
-                    throw ServiceResultException.Create(StatusCodes.BadNonceInvalid, "Server nonce is not the correct length or not random enough.");
+                    if (!m_configuration.SecurityConfiguration.SuppressNonceUnsecureErrors)
+                    {
+                        throw ServiceResultException.Create(StatusCodes.BadNonceInvalid, "The server nonce has not the correct length or is not random enough.");
+                    }
+                    else
+                    {
+                        Utils.Trace((int)TraceMasks.Security, "Warning: The server nonce has not the correct length or is not random enough. The error was suppressed.");
+                    }
                 }
 
                 // check that new nonce is different from the previously returned server nonce.
@@ -330,6 +338,10 @@ namespace Opc.Ua.Client
                     if (!m_configuration.SecurityConfiguration.SuppressNonceValidationErrors)
                     {
                         throw ServiceResultException.Create(StatusCodes.BadNonceInvalid, "Server nonce is equal with previously returned nonce.");
+                    }
+                    else
+                    {
+                        Utils.Trace((int)TraceMasks.Security, "Warning: The Server nonce is equal with previously returned nonce. The error was suppressed.");
                     }
                 }
             }
@@ -4491,8 +4503,7 @@ namespace Opc.Ua.Client
                 // Delete abandoned subscription from server.
                 Utils.Trace("Received Publish Response for Unknown SubscriptionId={0}", subscriptionId);
 
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     DeleteSubscription(subscriptionId);
                 });
             }

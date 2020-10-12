@@ -1013,6 +1013,19 @@ namespace Opc.Ua
             get { return m_suppressNonceValidationErrors; }
             set { m_suppressNonceValidationErrors = value; }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the server nonce unsecure errors should be suppressed.
+        /// </summary>
+        /// <remarks>
+        /// If set to true the server nonce unsecure errors are suppressed.
+        /// </remarks>
+        [DataMember(IsRequired = false, EmitDefaultValue = false, Order = 19)]
+        public bool SuppressNonceUnsecureErrors
+        {
+            get { return m_suppressNonceUnsecureErrors; }
+            set { m_suppressNonceUnsecureErrors = value; }
+        }
         #endregion
 
         #region Private Fields
@@ -1033,6 +1046,7 @@ namespace Opc.Ua
         private bool m_addAppCertToTrustedStore;
         private bool m_sendCertificateChain;
         private bool m_suppressNonceValidationErrors;
+        private bool m_suppressNonceUnsecureErrors;
         #endregion
     }
     #endregion
